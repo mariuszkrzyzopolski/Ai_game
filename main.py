@@ -59,7 +59,15 @@ class SixMensMorris(TwoPlayerGame):
         # TODO new board
         print(self.nmove)
         print([self.player_1_pieces, self.player_2_pieces])
-        print(self.board)
+        print(str(self.board[0])+3*"-"+str(self.board[1])+3*"-"+str(self.board[2]))
+        print("|"+3*" "+"|"+3*" "+"|")
+        print("| "+str(self.board[3])+"-"+str(self.board[4])+"-"+str(self.board[5])+" |")
+        print("| |   | |")
+        print(str(self.board[6])+"-"+str(self.board[7])+3*" "+str(self.board[8])+"-"+str(self.board[9]))
+        print("| |   | |")
+        print("| "+str(self.board[10])+"-"+str(self.board[11])+"-"+str(self.board[12])+" |")
+        print("|"+3*" "+"|"+3*" "+"|")
+        print(str(self.board[13])+3*"-"+str(self.board[14])+3*"-"+str(self.board[15]))
 
     def scoring(self):
         return -100 if self.lose() else 0
