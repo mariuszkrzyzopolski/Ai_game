@@ -18,40 +18,44 @@ class SixMensMorris(TwoPlayerGame):
         self.nmove = 0
 
     def possible_moves(self):
-        if self.nmove >= 12:
+        if self.nmove <= 12:
+            return [i + 1 for i, e in enumerate(self.board) if e == 0]
+        else:
             return [v for key in self.get_player_pieces_indexes(self.current_player) if key in self.board_connections
                     for v in self.board_connections[key]]
-        else:
-            return [i + 1 for i, e in enumerate(self.board) if e == 0]
 
     def make_move(self, move):
-        self.board[int(move) - 1] = self.current_player
-        self.pound(move)
-        if self.nmove >= 12:
+        if self.nmove <= 12:
+            move_index = int(move) - 1
+            self.board[move_index] = self.current_player
+            self.pound(move_index)
+        else:
             # TODO take off nearby piece to move it
             pass
+
+    def mill(self, move):
+        lines = [[0, 1, 2],
+                [3, 4, 5],
+                [10, 11, 12],
+                [13, 14, 15],
+                [0, 6, 13],
+                [3, 7, 10],
+                [5, 8, 12],
+                [2, 9, 15]
+                ]
+
+        for line in lines:
+            if move in line and self.board[line[0]] == self.board[line[1]] == self.board[line[2]] == self.current_player:
+                return True
+            
+        return False
+
 
     def get_player_pieces_indexes(self, player):
         return [i for i in range(len(self.board)) if self.board[i] == player]
 
     def pound(self, move):
-        # mill in place that player made move
-        mill = any(
-            [
-                all([(self.board[c - 1] == self.current_player) for c in line])
-                for line in [
-                [1, 2, 3],
-                [4, 5, 6],
-                [11, 12, 13],
-                [14, 15, 16],
-                [1, 7, 14],
-                [4, 8, 11],
-                [6, 9, 13],
-                [3, 10, 16],
-            ]
-            ]
-        )
-        if mill:
+        if self.mill(move):
             # player cannot be prompted because AI learn at both conditionals
             enemy_pieces_index = self.get_player_pieces_indexes(self.opponent_index)
             if self.current_player == 1:
@@ -70,23 +74,33 @@ class SixMensMorris(TwoPlayerGame):
         return (self.possible_moves() == []) or self.lose()
 
     def show(self):
-        print(self.nmove)
-        print([i for i in range(len(self.board)) if self.board[i] == 2])
-        print([self.player_1_pieces, self.player_2_pieces])
-        print(str(self.board[0]) + 3 * "-" + str(self.board[1]) + 3 * "-" + str(self.board[2]))
-        print("|" + 3 * " " + "|" + 3 * " " + "|")
-        print("| " + str(self.board[3]) + "-" + str(self.board[4]) + "-" + str(self.board[5]) + " |")
-        print("| |   | |")
-        print(str(self.board[6]) + "-" + str(self.board[7]) + 3 * " " + str(self.board[8]) + "-" + str(self.board[9]))
-        print("| |   | |")
-        print("| " + str(self.board[10]) + "-" + str(self.board[11]) + "-" + str(self.board[12]) + " |")
-        print("|" + 3 * " " + "|" + 3 * " " + "|")
-        print(str(self.board[13]) + 3 * "-" + str(self.board[14]) + 3 * "-" + str(self.board[15]))
+        if(self.current_player == 2 or self.nmove == 0):
+            print([self.player_1_pieces, self.player_2_pieces])
+            print(str(self.board[0]) + 5 * "-" + str(self.board[1]) + 5 * "-" + str(self.board[2]))
+            print("|" + 5 * " " + "|" + 5 * " " + "|")
+            print("|  " + str(self.board[3]) + "--" + str(self.board[4]) + "--" + str(self.board[5]) + "  |")
+            print("|  |     |  |")
+            print(str(self.board[6]) + "--" + str(self.board[7]) + 5 * " " + str(self.board[8]) + "--" + str(self.board[9]))
+            print("|  |     |  |")
+            print("|  " + str(self.board[10]) + "--" + str(self.board[11]) + "--" + str(self.board[12]) + "  |")
+            print("|" + 5 * " " + "|" + 5 * " " + "|")
+            print(str(self.board[13]) + 5 * "-" + str(self.board[14]) + 5 * "-" + str(self.board[15]))
 
     def scoring(self):
         return -100 if self.lose() else 0
 
+def print_help():
+    print(str(1) + 5 * "-" + str(2) + 5 * "-" + str(3))
+    print("|" + 5 * " " + "|" + 5 * " " + "|")
+    print("|  " + str(4) + "--" + str(5) + "--" + str(6) + "  |")
+    print("|  |     |  |")
+    print(str(7) + "--" + str(8) + 5 * " " + str(9) + "--" + str(10))
+    print("|  |     |  |")
+    print("|  " + str(11) + "-" + str(12) + "-" + str(13) + " |")
+    print("|" + 5 * " " + "|" + 5 * " " + "|")
+    print(str(14) + 4 * "-" + str(15) + 4 * "-" + str(16))
 
 if __name__ == "__main__":
+    print_help()
     ai_algo = Negamax(6)
     SixMensMorris([Human_Player(), AI_Player(ai_algo)]).play()
