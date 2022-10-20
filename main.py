@@ -31,11 +31,12 @@ class SixMensMorris(TwoPlayerGame):
 
         :return: list with indexes where players can still move
         """
-        if self.nmove <= 12:
+        if self.nmove <= 2:
             return [i + 1 for i, e in enumerate(self.board) if e == 0]
         else:
-            return [v for key in self.get_player_pieces_indexes(self.current_player) if key in self.board_connections
-                    for v in self.board_connections[key]]
+            return [i + 1 for i in
+                    [v for key in self.get_player_pieces_indexes(self.current_player) if key in self.board_connections
+                     for v in self.board_connections[key]]]
 
     def make_move(self, move: int) -> None:
         """
@@ -47,9 +48,9 @@ class SixMensMorris(TwoPlayerGame):
         move_index = int(move) - 1
         self.board[move_index] = self.current_player
         self.beat(move_index)
-        if self.nmove > 12:
+        if self.nmove > 2:
             for key, value in self.board_connections.items():
-                if 6 in value:
+                if move in value:
                     piece_to_move = self.board_connections[key][0]
             self.board[piece_to_move] = 0
 
