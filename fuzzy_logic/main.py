@@ -5,6 +5,20 @@ Authors: Mariusz Krzyzopolski s21544 Tomasz Baj s20499
 import numpy as np
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
+import matplotlib.pyplot as plt
+
+
+def map_cloth(cloth_value: int) -> str:
+    if 1 <= cloth_value < 2:
+        return "undershirt and shorts"
+    elif 2 <= cloth_value < 3:
+        return "Shirt and and Long trousers"
+    elif 3 <= cloth_value < 4:
+        return "Transitional jacket and Long trousers"
+    elif 4 <= cloth_value < 5:
+        return "Winter Jacket and warmer pants"
+    elif cloth_value > 5:
+        return "Polar jacket, thermal clothing, polar trousers"
 
 
 def main():
@@ -52,11 +66,12 @@ def main():
     clothing_ctrl = ctrl.ControlSystem([rule1, rule2, rule3, rule4, rule5])
     cloth = ctrl.ControlSystemSimulation(clothing_ctrl)
 
-    cloth.input["temperature"] = 15.0
-    cloth.input["humidity"] = 30.4
-    cloth.input["length_of_trip"] = 60
+    cloth.input["temperature"] = int(input("Temperature: "))  # = 15.0
+    cloth.input["humidity"] = int(input("Humidity: "))  # = 30.4
+    cloth.input["length_of_trip"] = int(input("Length_of_trip: "))  # = 60
     cloth.compute()
-    print(cloth.output["how_warm_cloth"])
+    print(cloth.output['how_warm_cloth'])
+    print(f"You should wear {map_cloth(cloth.output['how_warm_cloth'])}")
     how_warm_cloth.view(sim=cloth)
 
     cloth.input["temperature"] = -15.0
@@ -86,6 +101,7 @@ def main():
     cloth.compute()
     print(cloth.output["how_warm_cloth"])
     how_warm_cloth.view(sim=cloth)
+    plt.show()
 
 
 if __name__ == '__main__':
