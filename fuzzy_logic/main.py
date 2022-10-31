@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 
 def map_cloth(cloth_value: int) -> str:
-    if 1 <= cloth_value < 2:
+    if 0 <= cloth_value < 2:
         return "undershirt and shorts"
     elif 2 <= cloth_value < 3:
         return "Shirt and and Long trousers"
@@ -17,7 +17,7 @@ def map_cloth(cloth_value: int) -> str:
         return "Transitional jacket and Long trousers"
     elif 4 <= cloth_value < 5:
         return "Winter Jacket and warmer pants"
-    elif cloth_value > 5:
+    elif cloth_value >= 5:
         return "Polar jacket, thermal clothing, polar trousers"
 
 
