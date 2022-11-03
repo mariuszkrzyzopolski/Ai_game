@@ -1,5 +1,8 @@
 """
 Authors: Mariusz Krzyzopolski s21544 Tomasz Baj s20499
+
+Initialize the script by installing numpy, skfuzzy and matplotlib with dependencies and run it with python 3
+First recommendation will wait for user input, and after that few sample recommendation will show up
 """
 
 import numpy as np
@@ -78,7 +81,7 @@ def main():
     rule6 = ctrl.Rule(humidity['medium'] & length_of_trip['medium'], how_warm_cloth['british'])
     rule7 = ctrl.Rule(humidity['high'] & length_of_trip['medium'], how_warm_cloth['british'])
     rule8 = ctrl.Rule(humidity['high'] & length_of_trip['long'], how_warm_cloth['british'])
-    rule9 = ctrl.Rule(humidity['medium'] & length_of_trip['short'], how_warm_cloth['hot'])
+    rule9 = ctrl.Rule(humidity['medium'] & length_of_trip['short'], how_warm_cloth['warm'])
 
     clothing_ctrl = ctrl.ControlSystem([rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9])
     cloth = ctrl.ControlSystemSimulation(clothing_ctrl)
