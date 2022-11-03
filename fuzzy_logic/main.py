@@ -9,6 +9,12 @@ import matplotlib.pyplot as plt
 
 
 def map_cloth(cloth_value: int) -> str:
+    """
+    Simple maping values to clothing, to receive meaningful output for human
+
+    :param cloth_value: int from 0 to 6
+    :return: description for set of clothes
+    """
     if 0 <= cloth_value < 2:
         return "undershirt and shorts"
     elif 2 <= cloth_value < 3:
@@ -22,18 +28,25 @@ def map_cloth(cloth_value: int) -> str:
 
 
 def main():
+    """
+        Fuzzy logic 'advice' what set of clothes user should wear, depending on the weather (temperature and humidity)
+        and how long the trip will be. Sample sets:
+        1. undershirt and shorts
+        2. Shirt and Long trousers
+        3. transitional jacket and Long trousers
+        4. winter Jacket and warmer pants
+        5. polar jacket, thermal clothing, polar trousers
+
+        Which is connected to indicators - hot, warm, british, cold and frosty
+        Range for temperature is -40 to 40 Celsius
+        Range for Humidity is 0 to 100%
+        Length of trip can be from 0 to 300, where 0 to 100 is short (short, medium, long)
+        """
     temperature = ctrl.Antecedent(np.arange(-40, 41, 1), 'temperature')  # Celsius
     humidity = ctrl.Antecedent(np.arange(0, 101, 1), 'humidity')  # Absolute humidity in g/m3
     length_of_trip = ctrl.Antecedent(np.arange(0, 301, 1), 'length_of_trip')  # minutes
 
     how_warm_cloth = ctrl.Consequent(np.arange(1, 6, 1), 'how_warm_cloth')
-    """
-    1. undershirt and shorts
-    2. Shirt and and Long trousers
-    3. transitional jacket and Long trousers
-    4. winter Jacket and warmer pants
-    5. polar jacket, thermal clothing, polar trousers
-    """
 
     temperature['low'] = fuzz.trapmf(np.arange(-40, 41, 1), [-40, -40, -5, 10])
     temperature['medium'] = fuzz.trapmf(np.arange(-40, 41, 1), [5, 10, 17, 21])
@@ -50,8 +63,8 @@ def main():
     length_of_trip['long'] = fuzz.trapmf(np.arange(0, 301, 1), [60, 240, 300, 300])
     length_of_trip.view()
 
-    how_warm_cloth['warm'] = fuzz.trapmf(how_warm_cloth.universe, [0, 0, 1, 2])
-    how_warm_cloth['hot'] = fuzz.trimf(how_warm_cloth.universe, [1, 2, 3])
+    how_warm_cloth['hot'] = fuzz.trapmf(how_warm_cloth.universe, [0, 0, 1, 2])
+    how_warm_cloth['warm'] = fuzz.trimf(how_warm_cloth.universe, [1, 2, 3])
     how_warm_cloth['british'] = fuzz.trimf(how_warm_cloth.universe, [2, 3, 4])
     how_warm_cloth['cold'] = fuzz.trimf(how_warm_cloth.universe, [3, 4, 5])
     how_warm_cloth['frosty'] = fuzz.trapmf(how_warm_cloth.universe, [4, 5, 6, 6])
