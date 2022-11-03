@@ -62,8 +62,12 @@ def main():
     rule3 = ctrl.Rule(temperature['medium'], how_warm_cloth['british'])
     rule4 = ctrl.Rule(temperature['low'] & length_of_trip['short'], how_warm_cloth['cold'])
     rule5 = ctrl.Rule(temperature['low'] & length_of_trip['long'], how_warm_cloth['frosty'])
+    rule6 = ctrl.Rule(humidity['medium'] & length_of_trip['medium'], how_warm_cloth['british'])
+    rule7 = ctrl.Rule(humidity['high'] & length_of_trip['medium'], how_warm_cloth['british'])
+    rule8 = ctrl.Rule(humidity['high'] & length_of_trip['long'], how_warm_cloth['british'])
+    rule9 = ctrl.Rule(humidity['medium'] & length_of_trip['short'], how_warm_cloth['hot'])
 
-    clothing_ctrl = ctrl.ControlSystem([rule1, rule2, rule3, rule4, rule5])
+    clothing_ctrl = ctrl.ControlSystem([rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9])
     cloth = ctrl.ControlSystemSimulation(clothing_ctrl)
 
     cloth.input["temperature"] = int(input("Temperature: "))  # = 15.0
