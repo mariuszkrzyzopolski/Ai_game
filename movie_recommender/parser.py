@@ -7,7 +7,7 @@ header = []
 header = next(csv_reader)
 rows_movie = {}
 for row in csv_reader:
-    rows_movie.update({row[0]: row[3]})
+    rows_movie.update({row[0]: row[1]})
 csv_file.close()
 
 csv_file = open('ratings_small.csv')
