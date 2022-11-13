@@ -1,41 +1,29 @@
 # authors: s21544 Mariusz Krzyzopolski s20499 Tomasz Baj
 
-
-import json
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
-
-
-ratings = pd.read_csv('ratings.csv', usecols = ['userId', 'movieId','rating'])
-print('Shape of ratings dataset is: ',ratings.shape, '\n')
-print('Max values in dataset are \n',ratings.max(), '\n')
-print('Min values in dataset are \n',ratings.min(), '\n')
-
-def moviesListForUsers(users, users_data):
-    # users = a list of users IDs
-    # users_data = a dataframe of users favourite movies or users watched movies
-    users_movies_list = []
-    for user in users:
-        users_movies_list.append(str(list(users_data[users_data['userId'] == user]['movieId'])).split('[')[1].split(']')[0])
-    return users_movies_list
-
-
 import argparse
 import json
+import matplotlib.pyplot as plt
 import numpy as np
+import random
+from sklearn.cluster import KMeans
 
 
 def build_arg_parser():
     parser = argparse.ArgumentParser(description='Compute similarity score')
-    parser.add_argument('--user1', dest='user1', required=True,
-                        help='First user')
-    parser.add_argument('--user2', dest='user2', required=True,
-                        help='Second user')
+    parser.add_argument('--user', dest='user', required=True,
+                        help='User')
     parser.add_argument("--score-type", dest="score_type", required=True,
                         choices=['Euclidean', 'Pearson'], help='Similarity metric to be used')
     return parser
+
+
+def find_common_movies(dataset, user1, user2):
+    # Movies rated by both user1 and user2
+    common_movies = {}
+    for item in dataset[user1]:
+        if item in dataset[user2]:
+            common_movies[item] = 1
+    return common_movies
 
 
 # Compute the Euclidean distance score between user1 and user2
@@ -46,12 +34,7 @@ def euclidean_score(dataset, user1, user2):
     if user2 not in dataset:
         raise TypeError('Cannot find ' + user2 + ' in the dataset')
 
-    # Movies rated by both user1 and user2
-    common_movies = {}
-
-    for item in dataset[user1]:
-        if item in dataset[user2]:
-            common_movies[item] = 1
+    common_movies = find_common_movies(dataset, user1, user2)
 
     # If there are no common movies between the users,
     # then the score is 0
@@ -76,11 +59,7 @@ def pearson_score(dataset, user1, user2):
         raise TypeError('Cannot find ' + user2 + ' in the dataset')
 
     # Movies rated by both user1 and user2
-    common_movies = {}
-
-    for item in dataset[user1]:
-        if item in dataset[user2]:
-            common_movies[item] = 1
+    common_movies = find_common_movies(dataset, user1, user2)
 
     num_ratings = len(common_movies)
 
@@ -110,22 +89,117 @@ def pearson_score(dataset, user1, user2):
     return Sxy / np.sqrt(Sxx * Syy)
 
 
-if __name__ == '__main__':
-    # args = build_arg_parser().parse_args()
-    user1 = 'David Smith'  # args.user1
-    user2 = 'Brenda Peterson'  # args.user2
-    score_type = 'Euclidean'  # args.score_type
+def pltShow(data_frame):
+    km = KMeans(n_clusters=2,
+                init='random',
+                n_init=10,
+                max_iter=300,
+                tol=1e-04,
+                random_state=0)
 
-    ratings_file = 'ratings.csv'
+    y_km = km.fit_predict(data_frame)
+    number = max(y_km) + 1
+    color = ["#" + ''.join([random.choice('0123456789ABCDEF') for i in range(6)]) for j in range(number)]
 
-    #with open(ratings_file, 'r') as f:
-        #data = json.loads(f.read())
-    data = pd.read_csv('ratings.csv', usecols=['userId', 'movieId', 'rating'])
+    for i in range(number):
+        plt.scatter(data_frame[y_km == i, 0], data_frame[y_km == i, 1],
+                    c=color[i], marker='o', s=40,
+                    edgecolor='black',
+                    label='Skupienie ' + str(i))
 
+    plt.scatter(km.cluster_centers_[:, 0],
+                km.cluster_centers_[:, 1],
+                s=250, marker='*',
+                c='red', edgecolor='black',
+                label='Centroidy')
+    plt.legend()
+    plt.xlabel("Distanse")
+    plt.ylabel("Numbers of common movie")
+    plt.tight_layout()
+    plt.show()
+
+
+def kmeans(data, user, score_type):
+    df = []
     if score_type == 'Euclidean':
-        print("\nEuclidean score:")
-        print(euclidean_score(data, user1, user2))
-    else:
-        print("\nPearson score:")
-        print(pearson_score(data, user1, user2))
+        for user1 in data:
+            if user1 != user:
+                df.append([euclidean_score(data, user, user1), len(find_common_movies(data, user, user1))])
+    if score_type == 'Pearson':
+        for user1 in data:
+            if user1 != user:
+                df.append([pearson_score(data, user, user1), len(find_common_movies(data, user, user1))])
 
+    df = np.array(df)
+
+    # Loading the dataset
+    plt.scatter(df[:, 0], df[:, 1], c='white', marker='o', edgecolor='black', s=50)
+    plt.xlabel("Distanse")
+    plt.ylabel("Numbers of common movie")
+    plt.grid()
+    plt.tight_layout()
+    plt.show()
+
+    pltShow(df)
+
+
+def remove_duplicate(movies):
+    new_db = []
+    for movie in movies:
+        tmp_list = []
+        if movie in new_db:
+            continue
+        for i in movies:
+            if movie[0] == i[0]:
+                tmp_list.append(i)
+        avg_movie = [tmp_list[0][0], 0, 0]
+        for i in tmp_list:
+            avg_movie[1] += i[1]
+            avg_movie[2] += i[2]
+        avg_movie[1] = avg_movie[1] / len(tmp_list)
+        avg_movie[2] = avg_movie[2] / len(tmp_list)
+        if avg_movie not in new_db:
+            new_db.append(avg_movie)
+    return new_db
+
+
+if __name__ == '__main__':
+    args = build_arg_parser().parse_args()
+    user = args.user
+    score_type = args.score_type
+    ratings_file = 'ratings.json'
+    #ratings_file = 'ratings_small.json'
+
+    with open(ratings_file, 'r') as f:
+        data = json.loads(f.read())
+
+    # kmeans(data, user, 'Euclidean')
+    # kmeans(data, user, 'Pearson')
+    db = []
+    list_similar_users = []
+    for other_user in data:
+        if score_type == 'Euclidean':
+            similarity_ratio = euclidean_score(data, user, other_user)
+        if score_type == 'Pearson':
+            similarity_ratio = pearson_score(data, user, other_user)
+        distance = len(find_common_movies(data, user, other_user))
+        if other_user != user and distance > 0:
+            # list_similar_users.append([other_user, data[other_user], distance, match_multipiler])
+            for movie in data[other_user]:
+                if movie not in data[user].keys():
+                    db.append([movie, data[other_user][movie], similarity_ratio * data[other_user][movie]])
+
+    db = remove_duplicate(db)
+
+    def myFunc(e):
+        return e[2]
+    db.sort(key=myFunc)
+    print("good for you")
+    for i in db[-5:]:
+        print(i[0])
+    print("don't watch")
+    for i in db[:5]:
+        print(i[0])
+
+
+#python main.py --user 'Paweł Czapiewski' --score-type Pearson
