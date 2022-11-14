@@ -2,10 +2,17 @@
 
 import argparse
 import json
+
+import numpy
 import numpy as np
 
 
-def build_arg_parser():
+def build_arg_parser() -> argparse.ArgumentParser:
+    """
+    build parser of arguments to enable Euclidean and Pearson mode for certain user
+
+    :return: ArgumentParser
+    """
     parser = argparse.ArgumentParser(description='Compute similarity score')
     parser.add_argument('--user', dest='user', required=True,
                         help='User')
@@ -14,9 +21,15 @@ def build_arg_parser():
     return parser
 
 
-# Find common movies
-def find_common_movies(dataset, user1, user2):
-    # Movies rated by both user1 and user2
+def find_common_movies(dataset: dict, user1: str, user2: str) -> dict:
+    """
+    Find and return only movies rated similar by both users
+
+    :param: user2: name of user2
+    :param: user1: name of user1
+    :param: dataset: dict with users movies and ratings for them
+    :return: related movies
+    """
     common_movies = {}
     for item in dataset[user1]:
         if item in dataset[user2]:
@@ -24,9 +37,16 @@ def find_common_movies(dataset, user1, user2):
     return common_movies
 
 
-# Compute the Euclidean distance score between user1 and user2
-def euclidean_score(dataset, user1, user2):
-    common_movies = find_common_movies(dataset, user1, user2)
+def euclidean_score(dataset: dict, user1: str, user2: str) -> numpy.float64:
+    """
+    Compute the Euclidean distance score between user1 and user2
+
+    :param: user2: name of user2
+    :param: user1: name of user1
+    :param: dataset: dict with users movies and ratings for them
+    :return: float correlation between target users, between 1 and 0
+    """
+    find_common_movies(dataset, user1, user2)
     squared_diff = []
     for item in dataset[user1]:
         if item in dataset[user2]:
@@ -34,9 +54,15 @@ def euclidean_score(dataset, user1, user2):
     return 1 / (1 + np.sqrt(np.sum(squared_diff)))
 
 
-# Compute the Pearson correlation score between user1 and user2
-def pearson_score(dataset, user1, user2):
-    # Movies rated by both user1 and user2
+def pearson_score(dataset: dict, user1: str, user2: str) -> numpy.float64:
+    """
+    Compute the Pearson correlation score between user1 and user2
+
+    :param: user2: name of user2
+    :param: user1: name of user1
+    :param: dataset: dict with users movies and ratings for them
+    :return float correlation between target users, between 1 and 0
+    """
     common_movies = find_common_movies(dataset, user1, user2)
     num_ratings = len(common_movies)
 
@@ -52,18 +78,22 @@ def pearson_score(dataset, user1, user2):
     sum_of_products = np.sum([dataset[user1][item] * dataset[user2][item] for item in common_movies])
 
     # Calculate the Pearson correlation score
-    Sxy = sum_of_products - (user1_sum * user2_sum / num_ratings)
-    Sxx = user1_squared_sum - np.square(user1_sum) / num_ratings
-    Syy = user2_squared_sum - np.square(user2_sum) / num_ratings
+    xy = sum_of_products - (user1_sum * user2_sum / num_ratings)
+    xx = user1_squared_sum - np.square(user1_sum) / num_ratings
+    yy = user2_squared_sum - np.square(user2_sum) / num_ratings
 
-    if Sxx * Syy == 0:
+    if xx * yy == 0:
         return 0
+    return xy / np.sqrt(xx * yy)
 
-    return Sxy / np.sqrt(Sxx * Syy)
 
+def average_duplicates(movies: list) -> list:
+    """
+    Find duplicate movies in list and averages the ratings
 
-# Find duplicate movies in list and averages the ratings
-def average_duplicates(movies):
+    :param: movies: list of movies, with their ratings
+    :return list of movies, without duplicates and with average rating
+    """
     new_db = []
     for movie in movies:
         tmp_list = []
@@ -92,7 +122,7 @@ if __name__ == '__main__':
         data = json.loads(f.read())
 
     if user not in data:
-        raise TypeError('Cannot find ' + user + ' in the dataset')
+        raise TypeError(f"Cannot find {user} in the dataset. You can choose from: {data.keys()}")
 
     db = []
     for other_user in data:
@@ -115,18 +145,16 @@ if __name__ == '__main__':
     db = average_duplicates(db)
 
 
-    def myFunc(e):
+    def my_func(e):
         return e[1]
 
 
-    db.sort(key=myFunc)
+    db.sort(key=my_func)
 
-    print("Recomended movie for for you:")
+    print("Recommended movie for for you:")
     for i in db[-5:]:
         print(i[0])
     print("")
     print("You probably won't like it:")
     for i in db[:5]:
         print(i[0])
-
-# python main.py --user 'Paweł Czapiewski' --score-type Euclidean
