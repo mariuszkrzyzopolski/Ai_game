@@ -2,9 +2,9 @@
 
 import argparse
 import json
-
-import numpy
+from operator import itemgetter
 import numpy as np
+from itertools import groupby
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -37,7 +37,7 @@ def find_common_movies(dataset: dict, user1: str, user2: str) -> dict:
     return common_movies
 
 
-def euclidean_score(dataset: dict, user1: str, user2: str) -> numpy.float64:
+def euclidean_score(dataset: dict, user1: str, user2: str) -> np.float64:
     """
     Compute the Euclidean distance score between user1 and user2
 
@@ -54,7 +54,7 @@ def euclidean_score(dataset: dict, user1: str, user2: str) -> numpy.float64:
     return 1 / (1 + np.sqrt(np.sum(squared_diff)))
 
 
-def pearson_score(dataset: dict, user1: str, user2: str) -> numpy.float64:
+def pearson_score(dataset: dict, user1: str, user2: str) -> float:
     """
     Compute the Pearson correlation score between user1 and user2
 
@@ -83,7 +83,7 @@ def pearson_score(dataset: dict, user1: str, user2: str) -> numpy.float64:
     yy = user2_squared_sum - np.square(user2_sum) / num_ratings
 
     if xx * yy == 0:
-        return 0
+        return 0.0
     return xy / np.sqrt(xx * yy)
 
 
@@ -94,21 +94,11 @@ def average_duplicates(movies: list) -> list:
     :param: movies: list of movies, with their ratings
     :return list of movies, without duplicates and with average rating
     """
-    new_db = []
-    for movie in movies:
-        tmp_list = []
-        if movie in new_db:
-            continue
-        for i in movies:
-            if movie[0] == i[0]:
-                tmp_list.append(i)
-        avg_movie = [tmp_list[0][0], 0]
-        for i in tmp_list:
-            avg_movie[1] += i[1]
-        avg_movie[1] = avg_movie[1] / len(tmp_list)
-        if avg_movie not in new_db:
-            new_db.append(avg_movie)
-    return new_db
+    result = []
+    movies.sort(key=itemgetter(0))
+    for key, value in groupby(movies, key=itemgetter(0)):
+        result.append([key, np.mean(list(v[1] for v in value))])
+    return result
 
 
 if __name__ == '__main__':
@@ -126,17 +116,16 @@ if __name__ == '__main__':
 
     db = []
     for other_user in data:
+        # If there are no common movies between the users,
+        # then skip
+        distance = len(find_common_movies(data, user, other_user))
+        if other_user == user or distance == 0:
+            continue
         similarity_ratio = 0
         if score_type == 'Euclidean':
             similarity_ratio = euclidean_score(data, user, other_user)
         if score_type == 'Pearson':
             similarity_ratio = pearson_score(data, user, other_user)
-        distance = len(find_common_movies(data, user, other_user))
-
-        # If there are no common movies between the users,
-        # then skip
-        if other_user == user or distance == 0:
-            continue
 
         for movie in data[other_user]:
             if movie not in data[user].keys():

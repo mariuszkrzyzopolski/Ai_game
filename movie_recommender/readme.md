@@ -1,12 +1,14 @@
 You can run script with python main.py
 
+pip install numpy
+
 For example:
 
-python main.py --user 'Paweł Czapiewski' --score-type Euclidean
+python3 main.py --user 'Paweł Czapiewski' --score-type Euclidean
 
 Example results:
 
-Recommended movie for for you:
+Recommended movie for you:
 Dictator,
 The Transporter,
 Rush Hour 3,
@@ -19,3 +21,5 @@ Predator,
 Titane,
 The Notebook,
 Bogowie
+
+Further example can be found in the repo as PNG files
