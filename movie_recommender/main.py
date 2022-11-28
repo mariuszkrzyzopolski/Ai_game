@@ -10,7 +10,6 @@ from itertools import groupby
 def build_arg_parser() -> argparse.ArgumentParser:
     """
     build parser of arguments to enable Euclidean and Pearson mode for certain user
-
     :return: ArgumentParser
     """
     parser = argparse.ArgumentParser(description='Compute similarity score')
@@ -24,7 +23,6 @@ def build_arg_parser() -> argparse.ArgumentParser:
 def find_common_movies(dataset: dict, user1: str, user2: str) -> dict:
     """
     Find and return only movies rated similar by both users
-
     :param: user2: name of user2
     :param: user1: name of user1
     :param: dataset: dict with users movies and ratings for them
@@ -40,7 +38,6 @@ def find_common_movies(dataset: dict, user1: str, user2: str) -> dict:
 def euclidean_score(dataset: dict, user1: str, user2: str) -> np.float64:
     """
     Compute the Euclidean distance score between user1 and user2
-
     :param: user2: name of user2
     :param: user1: name of user1
     :param: dataset: dict with users movies and ratings for them
@@ -57,7 +54,6 @@ def euclidean_score(dataset: dict, user1: str, user2: str) -> np.float64:
 def pearson_score(dataset: dict, user1: str, user2: str) -> float:
     """
     Compute the Pearson correlation score between user1 and user2
-
     :param: user2: name of user2
     :param: user1: name of user1
     :param: dataset: dict with users movies and ratings for them
@@ -90,7 +86,6 @@ def pearson_score(dataset: dict, user1: str, user2: str) -> float:
 def average_duplicates(movies: list) -> list:
     """
     Find duplicate movies in list and averages the ratings
-
     :param: movies: list of movies, with their ratings
     :return list of movies, without duplicates and with average rating
     """
